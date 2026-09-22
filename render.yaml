@@ -5,7 +5,9 @@ services:
     name: ongem
     runtime: docker
     dockerfilePath: ./Dockerfile
-    plan: 0.5c-512mb
+    # Free while building: sleeps after ~15 min idle (cold start 30-60s), no preDeployCommand.
+    # Upgrade to 0.5c-512mb before submission.
+    plan: free
     region: frankfurt # closest Render region to the UAE
     autoDeployTrigger: "off"
     # Render gates zero-downtime deploys on this: a new instance that can't reach the
@@ -23,7 +25,8 @@ services:
 
 databases:
   - name: ongem-db
-    plan: 0.1c-256mb
+    # Free while building: expires after 30 days, no backups. Upgrade to 0.1c-256mb before submission.
+    plan: free
     region: frankfurt
     postgresMajorVersion: "16"
     ipAllowList: [] # only reachable from Render services on the private network
