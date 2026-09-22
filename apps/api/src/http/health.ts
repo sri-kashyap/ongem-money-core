@@ -7,7 +7,7 @@ type HealthOptions = { db: Db; version: string };
 export const healthRoutes: FastifyPluginAsync<HealthOptions> = async (app, { db, version }) => {
   // Liveness: the process is up and serving. Never touches dependencies,
   // so a database outage doesn't make the platform restart healthy instances.
-  app.get('/healthz', () => ({ status: 'ok', version }));
+  app.get('/healthz', () => ({ status: 'ok', service: 'ongem', version }));
 
   // Readiness: we can do useful work, i.e. the database answers.
   app.get('/readyz', async (req, reply) => {
