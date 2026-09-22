@@ -18,7 +18,7 @@ describe('health endpoints without a database', () => {
   it('GET /healthz is 200 even when the database is down (liveness ignores dependencies)', async () => {
     const res = await app.inject({ method: 'GET', url: '/healthz' });
     expect(res.statusCode).toBe(200);
-    expect(res.json()).toEqual({ status: 'ok', version: 'test' });
+    expect(res.json()).toEqual({ status: 'ok', service: 'ongem', version: 'test' });
   });
 
   it('GET /readyz is 503 when the database is unreachable', async () => {
