@@ -1,0 +1,40 @@
+schema: spec-driven
+
+context: |
+  OnGem money core: a business neo-banking service for UAE and US companies, built on
+  Banking-as-a-Service providers. OnGem is not a bank; partner banks hold funds.
+  Stack: TypeScript (Node 24), pnpm workspace. apps/api = Fastify + PostgreSQL (plain SQL
+  migrations via node-pg-migrate, `pg` driver, no ORM). apps/web = Vite + React + Tailwind v4
+  + shadcn/ui, served as static files by the API. packages/shared = Zod schemas shared by both.
+  Tests: Vitest against a real Postgres (Testcontainers). Deployed to Render; migrations run
+  pre-deploy.
+  Domain invariants:
+  - Money is integer minor units (bigint), always paired with an ISO currency. Never floats.
+  - Balances are derived from a double-entry ledger (postings per journal entry sum to zero).
+    Ledger rows are immutable; corrections are new entries.
+  - current balance = sum of posted entries; available = current - active holds.
+  - Every business row belongs to exactly one entity; one entity's data must never be
+    reachable through another (app-level scoping + Postgres RLS).
+  - Core code depends on a BankingProvider interface, never on the mock provider directly.
+  - Inbound webhooks: verify HMAC-SHA256 over the raw body before parsing; dedupe by provider
+    event id. Outbound money movement requires an idempotency key.
+
+rules:
+  proposal:
+    - Keep proposals under 400 words and include a Non-goals section
+    - State which money or data-isolation risks the change touches
+  specs:
+    - Every requirement that can move money or expose data has WHEN/THEN scenarios for the
+      failure paths (duplicates, concurrency, bad input, cross-entity access), not only the happy path
+    - Scenarios name concrete amounts and currencies in minor units
+  design:
+    - Document transaction boundaries and locking for any code that changes balances
+  tasks:
+    - Each scenario that can lose money or leak data maps to a named automated test task
+    - Keep tasks small enough to review in one sitting (under ~1 hour each)
+
+operations:
+  apply:
+    guidance:
+      - Write or update the scenario's test before or alongside the implementation
+      - Run lint, typecheck and tests before checking off a task

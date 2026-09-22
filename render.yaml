@@ -1,0 +1,29 @@
+# Render Blueprint: infrastructure as code for the production environment.
+# Deploys are triggered by GitHub Actions only after CI passes (autoDeployTrigger: off).
+services:
+  - type: web
+    name: ongem
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: 0.5c-512mb
+    region: frankfurt # closest Render region to the UAE
+    autoDeployTrigger: "off"
+    # Render gates zero-downtime deploys on this: a new instance that can't reach the
+    # database never receives traffic, so a bad DATABASE_URL can't take the site down.
+    healthCheckPath: /readyz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LOG_LEVEL
+        value: info
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ongem-db
+          property: connectionString
+
+databases:
+  - name: ongem-db
+    plan: 0.1c-256mb
+    region: frankfurt
+    postgresMajorVersion: "16"
+    ipAllowList: [] # only reachable from Render services on the private network
